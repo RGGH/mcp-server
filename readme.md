@@ -1,6 +1,4 @@
 
-
-```markdown
 # MCPServer - A Simple TCP Server for Model Management
 
 This project implements a basic TCP server written in Rust using `tokio` and `reqwest` to handle Model Creation Protocol (MCP) requests. The server listens for incoming connections and processes JSON-RPC requests to interact with registered models, create sessions, generate responses, and close sessions.
@@ -125,11 +123,6 @@ fn example_model_handler(prompt: &str, context: &[String]) -> Result<String, Box
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
 
-### How to Use This README
 
-- Replace `https://github.com/your-username/mcp-server.git` with the actual URL of your repository.
-- Add any additional sections as needed, such as contributing guidelines or a changelog, depending on how you'd like to structure the repository.
 
-This README provides the necessary instructions for setting up and running the MCPServer project, along with examples for usage and testing!
