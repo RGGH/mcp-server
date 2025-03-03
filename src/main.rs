@@ -1,3 +1,5 @@
+#![allow(unused)]
+use reqwest;
 use tokio::{net::TcpListener, io::{AsyncReadExt, AsyncWriteExt}};
 use serde::{Serialize, Deserialize};
 use serde_json::{json, Value};
@@ -260,4 +262,36 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     
     Ok(())
+}
+
+async fn fetch_flight_data(lon: f64, lat: f64) -> Result<Value, Box<dyn std::error::Error + Send + Sync>> {
+    let url = format!("https://opensky-network.org/api/states/all");
+
+    let response = reqwest::get(&url).await?.json::<Value>().await?;
+
+    // Filter flights near the given coordinates
+    if let Some(states) = response.get("states").and_then(|v| v.as_array()) {
+        let nearby_flights: Vec<_> = states.iter()
+            .filter_map(|entry| {
+                let callsign = entry.get(1)?.as_str().unwrap_or("Unknown").to_string();
+                let flight_lon = entry.get(5)?.as_f64()?;
+                let flight_lat = entry.get(6)?.as_f64()?;
+                
+                let distance = ((flight_lon - lon).powi(2) + (flight_lat - lat).powi(2)).sqrt();
+                if distance < 1.0 {  // Filter flights within ~1-degree radius
+                    Some(json!({
+                        "callsign": callsign,
+                        "longitude": flight_lon,
+                        "latitude": flight_lat
+                    }))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        
+        Ok(json!({ "flights": nearby_flights }))
+    } else {
+        Ok(json!({ "flights": [] }))
+    }
 }
